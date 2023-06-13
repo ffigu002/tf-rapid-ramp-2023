@@ -1,6 +1,5 @@
 
 provider "azurerm" {
-  #environment     = "usgovernment"
   features {}
 }
 

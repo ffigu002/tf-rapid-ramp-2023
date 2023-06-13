@@ -9,8 +9,6 @@ variables:
 - name: backendContainerName
   value: "testcontainer2"
 
-# disable CI per:
-# https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/github?view=azure-devops&tabs=yaml#disabling-the-ci-trigger
 trigger: none
 
 pool:
@@ -18,34 +16,36 @@ pool:
 
 
 stages:
-  - stage: Terraform
+  - stage: baseinfra_stage
+    displayName: 'Base Infrastructure Stage'
     jobs:
-      - job: Terraform_Build
+      - job: baseinfra_Build
+        displayName: "Base Infrastructure Build"
         steps:
         - checkout: self
-        - task: AzureCLI@2
-          displayName: Terraform Init
-          inputs:
-            azureSubscription: ${{ variables.serviceConnection }}
-            addSpnToEnvironment: true
-            scriptType: bash
-            scriptPath: ./PipelineTemplates/Terraform/TerraformInit.sh
-            workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform/base-infra'
-            arguments: ${{ variables.backendResourceGroupName }} ${{ variables.backendStorageAccountName }} ${{ variables.backendContainerName }}
-        # - task: AzureCLI@2
-        #   displayName: Terraform Plan
-        #   inputs:
-        #     azureSubscription: ${{ variables.serviceConnection }}
-        #     addSpnToEnvironment: true
-        #     scriptType: bash
-        #     scriptPath:  ./TerraformPlan.sh
-        #     workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
-        # - task: AzureCLI@2
-        #   displayName: Terraform Apply
-        #   inputs:
-        #     azureSubscription: ${{ variables.serviceConnection}}
-        #     addSpnToEnvironment: true
-        #     scriptType: bash
-        #     scriptPath:  ./TerraformApply.sh
+          persistCredentials: true
+        - template: /PipelineTemplates/Terraform/Terraform.yaml
+          parameters:
+            serviceConnection: ${{ variables.serviceConnection  }}
+            backendResourceGroupName: ${{ variables.backendResourceGroupName }}
+            backendStorageAccountName: ${{ variables.backendStorageAccountName }}
+            backendContainerName: ${{ variables.backendContainerName }}
+            currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/Terraform/base-infra'
+  - stage: vms_stage
+    displayName: 'Virtual Machines Stage'
+    jobs:
+      - job: vms_build
+        displayName: 'Virtual Machines Build'
+        steps:
+        - checkout: self
+          persistCredentials: true
+        - template: /PipelineTemplates/Terraform/Terraform.yaml
+          parameters:
+            serviceConnection: ${{ variables.serviceConnection  }}
+            backendResourceGroupName: ${{ variables.backendResourceGroupName }}
+            backendStorageAccountName: ${{ variables.backendStorageAccountName }}
+            backendContainerName: ${{ variables.backendContainerName }}
+            currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/Terraform/virtual-machines'
+
 
 

@@ -1,10 +1,19 @@
 
 provider "azurerm" {
-  #environment     = "usgovernment"
   features {}
 }
 
 #Reference remote state object to get values from other deployment
+data "terraform_remote_state" "base_infra" {
+  backend = "azurerm"
+
+  config = {
+    resource_group_name = var.backend_resource_group_name
+    storage_account_name = var.backend_storage_account_name
+    container_name = var.backend_container_name
+    key = "base-infra.terraform.tfstate"
+  }
+}
 
 resource "azurerm_resource_group" "example_rg" {
   location = var.location
@@ -18,7 +27,7 @@ resource "azurerm_network_interface" "example_nic" {
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_subnet.example_subnet.id
+    subnet_id                     = data.terraform_remote_state.base_infra.outputs.subnet_id #azurerm_subnet.example_subnet.id
     private_ip_address_allocation = "Dynamic"
   }
 }
@@ -28,8 +37,8 @@ resource "azurerm_windows_virtual_machine" "example" {
   resource_group_name = azurerm_resource_group.example_rg.name
   location            = var.location
   size                = "Standard_F2"
-  admin_username      = "adminuser"
-  admin_password      = "P@$$w0rd1234!"
+  admin_username      = var.vm_admin_user_name
+  admin_password      = var.vm_admin_password
   network_interface_ids = [
     azurerm_network_interface.example_nic.id,
   ]
@@ -46,3 +55,5 @@ resource "azurerm_windows_virtual_machine" "example" {
     version   = "latest"
   }
 }
+
+

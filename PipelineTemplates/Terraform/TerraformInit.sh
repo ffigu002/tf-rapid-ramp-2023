@@ -3,8 +3,14 @@ backendResourceGroupName=$1
 backendStorageAccountName=$2
 backendContainerName=$3
 
+
+echo "backend resource group name is $backendResourceGroupName"
+echo "backend storage account name path is $backendStorageAccountName"
 pwd 
 ls -Flah
+
+currentWorkingDirectory=$(basename "$PWD")
+echo "current working directory $currentWorkingDirectory"
 
 ARM_SUBSCRIPTION_ID=$(az account show --query id --out tsv)
 
@@ -16,4 +22,4 @@ terraform init -upgrade -input=false \
 -backend-config="resource_group_name=$backendResourceGroupName" \
 -backend-config="storage_account_name=$backendStorageAccountName" \
 -backend-config="container_name=$backendContainerName" \
--backend-config="key={current_working_directory}.terraform.tfstate"
+-backend-config="key=$currentWorkingDirectory.terraform.tfstate"

@@ -31,11 +31,11 @@ stages:
             backendStorageAccountName: ${{ variables.backendStorageAccountName }}
             backendContainerName: ${{ variables.backendContainerName }}
             currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/Terraform/base-infra'
-  - stage: vms_stage
-    displayName: 'Virtual Machines Stage'
+  - stage: web_servers_stage
+    displayName: 'Web Servers Stage'
     jobs:
       - job: vms_build
-        displayName: 'Virtual Machines Build'
+        displayName: 'Web Servers Build'
         steps:
         - checkout: self
           persistCredentials: true
@@ -45,7 +45,7 @@ stages:
             backendResourceGroupName: ${{ variables.backendResourceGroupName }}
             backendStorageAccountName: ${{ variables.backendStorageAccountName }}
             backendContainerName: ${{ variables.backendContainerName }}
-            currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/Terraform/virtual-machines'
+            currentWorkingDirectory: '$(System.DefaultWorkingDirectory)/Terraform/web-servers'
 
 
 

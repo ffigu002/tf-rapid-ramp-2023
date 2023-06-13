@@ -3,14 +3,10 @@ backendResourceGroupName=$1
 backendStorageAccountName=$2
 backendContainerName=$3
 
-
-echo "backend resource group name is $backendResourceGroupName"
-echo "backend storage account name path is $backendStorageAccountName"
 pwd 
 ls -Flah
 
 currentWorkingDirectory=$(basename "$PWD")
-echo "current working directory $currentWorkingDirectory"
 
 ARM_SUBSCRIPTION_ID=$(az account show --query id --out tsv)
 

@@ -1,0 +1,11 @@
+# Terraform artifacts
+*.tfvars
+*.terraform
+*.tfstate
+*.tfstate.*
+terraform-provider-azurerm_v*
+terraform-provider-random_v*
+*.terraform.lock.hcl
+
+# Terraform logs
+crash.log

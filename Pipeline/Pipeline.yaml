@@ -1,0 +1,51 @@
+
+variables:
+- name: serviceConnection 
+  value: "carml-spn"
+- name: backendResourceGroupName
+  value: "test-sa-03262023"
+- name: backendStorageAccountName
+  value: "testsa03262023"
+- name: backendContainerName
+  value: "testcontainer2"
+
+# disable CI per:
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/github?view=azure-devops&tabs=yaml#disabling-the-ci-trigger
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+
+stages:
+  - stage: Terraform
+    jobs:
+      - job: Terraform_Build
+        steps:
+        - checkout: self
+        - task: AzureCLI@2
+          displayName: Terraform Init
+          inputs:
+            azureSubscription: ${{ variables.serviceConnection }}
+            addSpnToEnvironment: true
+            scriptType: bash
+            scriptPath: ./PipelineTemplates/Terraform/TerraformInit.sh
+            workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform/base-infra'
+            arguments: ${{ variables.backendResourceGroupName }} ${{ variables.backendStorageAccountName }} ${{ variables.backendContainerName }}
+        # - task: AzureCLI@2
+        #   displayName: Terraform Plan
+        #   inputs:
+        #     azureSubscription: ${{ variables.serviceConnection }}
+        #     addSpnToEnvironment: true
+        #     scriptType: bash
+        #     scriptPath:  ./TerraformPlan.sh
+        #     workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
+        # - task: AzureCLI@2
+        #   displayName: Terraform Apply
+        #   inputs:
+        #     azureSubscription: ${{ variables.serviceConnection}}
+        #     addSpnToEnvironment: true
+        #     scriptType: bash
+        #     scriptPath:  ./TerraformApply.sh
+
+

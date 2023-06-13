@@ -1,0 +1,36 @@
+parameters:
+  backendServiceConnectionApp:
+  serviceConnectionApp:
+  environment:
+  configPath:
+  relativePath:
+  backendResourceGroupName:
+  backendStorageAccountName:
+  backendContainerName:
+
+steps:
+  - task: AzureCLI@2
+    displayName: Terraform Init
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnectionApp }}
+      addSpnToEnvironment: true
+      scriptType: bash
+      scriptPath: ./PipelineTemplates/Terraform/TerraformInit.sh
+      arguments: $(Build.Repository.Name) ${{ parameters.environment }} ${{ parameters.configPath }} ${{ parameters.relativePath }} ${{ parameters.backendResourceGroupName }} ${{ parameters.backendStorageAccountName }} ${{ parameters.backendContainerName }}
+  - task: AzureCLI@2
+    displayName: Terraform Plan
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnectionApp }}
+      addSpnToEnvironment: true
+      scriptType: bash
+      scriptPath: ./PipelineTemplates/Terraform/TerraformPlan.sh
+      arguments: $(Build.Repository.Name) ${{ parameters.environment }} ${{ parameters.configPath }}  ${{ parameters.relativePath }}
+  - task: AzureCLI@2
+    displayName: Terraform Apply
+    condition: ne(variables['Build.Reason'], 'PullRequest')
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnectionApp }}
+      addSpnToEnvironment: true
+      scriptType: bash
+      scriptPath: ./PipelineTemplates/Terraform/TerraformApply.sh
+      arguments: $(Build.Repository.Name) ${{ parameters.environment }} ${{ parameters.configPath }}  ${{ parameters.relativePath }}
